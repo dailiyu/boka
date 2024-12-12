@@ -1,0 +1,43 @@
+{
+  "hash": "015abbf9",
+  "configHash": "fbb17c7b",
+  "lockfileHash": "e0b008cb",
+  "browserHash": "d12d7692",
+  "optimized": {
+    "@polkadot/api": {
+      "src": "../../../../../node_modules/@polkadot/api/index.js",
+      "file": "@polkadot_api.js",
+      "fileHash": "5a8806a5",
+      "needsInterop": false
+    },
+    "@polkadot/api-contract": {
+      "src": "../../../../../node_modules/@polkadot/api-contract/index.js",
+      "file": "@polkadot_api-contract.js",
+      "fileHash": "a4215a1d",
+      "needsInterop": false
+    },
+    "@polkadot/keyring": {
+      "src": "../../../../../node_modules/@polkadot/keyring/index.js",
+      "file": "@polkadot_keyring.js",
+      "fileHash": "a1370a8d",
+      "needsInterop": false
+    },
+    "@polkadot/util-crypto": {
+      "src": "../../../../../node_modules/@polkadot/util-crypto/index.js",
+      "file": "@polkadot_util-crypto.js",
+      "fileHash": "703efa1c",
+      "needsInterop": false
+    }
+  },
+  "chunks": {
+    "chunk-DOPEMAGR": {
+      "file": "chunk-DOPEMAGR.js"
+    },
+    "chunk-XP6SH3PP": {
+      "file": "chunk-XP6SH3PP.js"
+    },
+    "chunk-XJDHVIOM": {
+      "file": "chunk-XJDHVIOM.js"
+    }
+  }
+}
