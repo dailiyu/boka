@@ -7,12 +7,13 @@ import {
   createTestPairs,
   keyring_default,
   packageInfo
-} from "./chunk-XP6SH3PP.js";
+} from "./chunk-3HXKZE63.js";
 import {
   decodeAddress,
   encodeAddress,
   setSS58Format
-} from "./chunk-XJDHVIOM.js";
+} from "./chunk-AMAN4TA5.js";
+import "./chunk-6IWCG5DM.js";
 export {
   DEV_PHRASE,
   DEV_SEED,

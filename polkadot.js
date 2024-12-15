@@ -4,7 +4,8 @@ import { Keyring } from '@polkadot/keyring';
 import { cryptoWaitReady } from '@polkadot/util-crypto';
 import marketMakerAbi from './marketMakerAbi.json'; // 市场做市合约 ABI
 import d9UsdtAbi from './d9UsdtAbi.json'; // PSP22 合约 ABI
-
+import { customRpc } from './customRPC'
+import { BN, BN_ONE } from '@polkadot/util'
 // 合约地址
 const marketMakerContractAddress = 'z8keEeLwjZFK5NS5PF6xYwTHEbm7jwpH4gBYB1JV6pDTtWg'; // Market-Maker 合约地址
 const d9UsdtContractAddress = 'uLj9DRUujbpCyK7USZY5ebGbxdtKoWvdRvGyyUsoLWDsNng'; // PSP22 合约地址
@@ -26,7 +27,7 @@ export async function connectToPolkadot() {
     }
 
     const provider = new WsProvider('wss://mainnet.d9network.com:40300');
-    apiInstance = await ApiPromise.create({ provider });
+    apiInstance = await ApiPromise.create({ provider:provider,rpc:customRpc });
     console.log('连接成功:', apiInstance.isConnected);
     return apiInstance;
   } catch (error) {
@@ -117,7 +118,7 @@ export async function swapD9ToUSDT(senderMnemonic, d9Amount) {
       });
 }
 
-// 转账
+// d9转账
 export async function transfer(senderMnemonic, receiverAddress, amount) {
   try {
     const api = await connectToPolkadot();
@@ -130,6 +131,67 @@ export async function transfer(senderMnemonic, receiverAddress, amount) {
     return hash.toHex();
   } catch (error) {
     console.error('转账失败:', error);
+    throw error;
+  }
+}
+
+// USDT 转账函数
+export async function transferUSDT(senderMnemonic, receiverAddress, usdtAmount) {
+  try {
+    // 1. 连接到 Polkadot 网络
+    const api = await connectToPolkadot();
+
+    // 2. 获取 USDT 合约实例
+    const usdtContract = await getPSP22ContractInstance();
+
+    // 3. 创建发送者账户
+    await cryptoWaitReady(); // 确保加密模块已准备就绪
+    const keyring = new Keyring({ type: 'sr25519', ss58Format: 9 });
+    const sender = keyring.addFromUri(senderMnemonic);
+
+    // 4. 转账金额转换为链上单位
+    const formattedAmount = api.registry.createType('u128', usdtAmount);
+
+    // 5. 设置 Gas 限制
+    const gasLimit = api.registry.createType('WeightV2', {
+      refTime: BigInt(50_000_000_000),
+      proofSize: BigInt(800_000),
+    });
+
+    console.log(`正在从 ${sender.address} 向 ${receiverAddress} 转账 ${usdtAmount} USDT`);
+
+    // 6. 调用 USDT 合约的 transfer 方法
+    const transferTx = usdtContract.tx['psp22::transfer'](
+      { gasLimit, storageDepositLimit: null },
+      receiverAddress, // 接收者地址
+      formattedAmount, // 转账金额
+      '0x0' // 附加数据（这里为空）
+    );
+
+    // 7. 签名并发送交易
+    const unsub = await transferTx.signAndSend(sender, ({ status, dispatchError }) => {
+      if (status.isInBlock) {
+        console.log('交易已包含在区块中:', status.asInBlock.toString());
+      } else if (status.isFinalized) {
+        console.log('交易已最终确认:', status.asFinalized.toString());
+        unsub(); // 取消订阅
+      }
+
+      // 检查是否有错误
+      if (dispatchError) {
+        if (dispatchError.isModule) {
+          const decoded = api.registry.findMetaError(dispatchError.asModule);
+          const { section, name, docs } = decoded;
+          console.error(`交易失败: ${section}.${name}: ${docs.join(' ')}`);
+        } else {
+          console.error('交易失败:', dispatchError.toString());
+        }
+      }
+    });
+
+    console.log('USDT 转账成功');
+  } catch (error) {
+    console.error('USDT 转账失败:', error);
     throw error;
   }
 }
@@ -154,8 +216,7 @@ export async function createOrImportAccount(mnemonic) {
 
 export async function swapUSDTToD9(senderMnemonic, usdtAmount) {
   try {
-    // 连接到 Polkadot 网络
-    const api = await connectToPolkadot();
+
 
     // 加载 USDT 合约实例和 Market-Maker 合约实例
     const usdtContract = await getPSP22ContractInstance();
@@ -174,7 +235,7 @@ export async function swapUSDTToD9(senderMnemonic, usdtAmount) {
     const allowanceQuery = await usdtContract.query['psp22::allowance'](
       senderAddress,
       {
-        gasLimit: api.registry.createType('WeightV2', { refTime: BigInt(50_000_000_000), proofSize: BigInt(800_000) }),
+        gasLimit: api.registry.createType('WeightV2', { refTime: new BN(5_000_000_000_000).isub(BN_ONE), proofSize: new BN(119903836479112) }),
         storageDepositLimit: null,
       },
       senderAddress,
@@ -196,15 +257,11 @@ export async function swapUSDTToD9(senderMnemonic, usdtAmount) {
     if (typeof currentAllowance === 'string') {
       currentAllowance = currentAllowance.replace(/,/g, ''); // 去掉逗号
     }
-
-    // if (!currentAllowance || isNaN(currentAllowance)) {
-    //   throw new Error(`无法解析 Allowance 值: ${JSON.stringify(currentAllowance)}`);
-    // }
-
     console.log(`当前 Allowance 为: ${currentAllowance}`);
 
     currentAllowance = BigInt(currentAllowance);
 
+    // 如果 Allowance 小于 USDT 数量，设置新的 Allowance
     if (currentAllowance < BigInt(usdtAmount)) {
       console.log('设置新的 Allowance...');
       const setAllowanceTx = await usdtContract.tx['psp22::approve'](
@@ -216,40 +273,69 @@ export async function swapUSDTToD9(senderMnemonic, usdtAmount) {
         formattedAmount
       );
 
-      const allowanceUnsub = await setAllowanceTx.signAndSend(sender, ({ status }) => {
+      const allowanceUnsub = await setAllowanceTx.signAndSend(sender, async ({ status }) => {
         if (status.isInBlock) {
           console.log('Allowance 交易已包含在区块中:', status.asInBlock.toString());
         } else if (status.isFinalized) {
           console.log('Allowance 设置成功:', status.asFinalized.toString());
           allowanceUnsub();
+          
+          // 在 Allowance 设置成功后执行兑换操作
+          console.log(`准备将 ${usdtAmount} USDT 转换为 D9`);
+          const gasLimit = api.registry.createType('WeightV2', { refTime: BigInt(50_000_000_000), proofSize: BigInt(800_000) });
+
+          const swapTx = await marketMakerContract.tx['getD9'](
+            {
+              gasLimit,
+              storageDepositLimit: null,
+            },
+            formattedAmount
+          );
+
+          const swapUnsub = await swapTx.signAndSend(sender, ({ status }) => {
+            if (status.isInBlock) {
+              console.log('交易已包含在区块中:', status.asInBlock.toString());
+              uni.showToast({
+                title: 'Swap successful!',
+                icon: 'success'
+              });
+            } else if (status.isFinalized) {
+              console.log('USDT 转 D9 成功，区块状态:', status.asFinalized.toString());
+        
+              swapUnsub();
+            }
+          });
         }
       });
     } else {
       console.log('当前 Allowance 已满足，无需重新设置');
+
+      // 如果已经有足够的 Allowance，直接进行兑换
+      console.log(`准备将 ${usdtAmount} USDT 转换为 D9`);
+      const gasLimit = api.registry.createType('WeightV2', { refTime: BigInt(50_000_000_000), proofSize: BigInt(800_000) });
+
+      const swapTx = await marketMakerContract.tx['getD9'](
+        {
+          gasLimit,
+          storageDepositLimit: null,
+        },
+        formattedAmount
+      );
+
+      const swapUnsub = await swapTx.signAndSend(sender, ({ status }) => {
+        if (status.isInBlock) {
+          console.log('交易已包含在区块中:', status.asInBlock.toString());
+        } else if (status.isFinalized) {
+          console.log('USDT 转 D9 成功，区块状态:', status.asFinalized.toString());
+          swapUnsub();
+        }
+      });
     }
-
-    // Step 2: 调用 Market-Maker 合约的 getD9 方法
-    console.log(`准备将 ${usdtAmount} USDT 转换为 D9`);
-    const gasLimit = api.registry.createType('WeightV2', { refTime: BigInt(50_000_000_000), proofSize: BigInt(800_000) });
-
-    const swapTx = await marketMakerContract.tx['getD9'](
-      {
-        gasLimit,
-        storageDepositLimit: null,
-      },
-      formattedAmount
-    );
-
-    const swapUnsub = await swapTx.signAndSend(sender, ({ status }) => {
-      if (status.isInBlock) {
-        console.log('交易已包含在区块中:', status.asInBlock.toString());
-      } else if (status.isFinalized) {
-        console.log('USDT 转 D9 成功，区块状态:', status.asFinalized.toString());
-        swapUnsub();
-      }
-    });
   } catch (error) {
     console.error('USDT 转 D9 失败:', error);
     throw error;
   }
 }
+
+
+

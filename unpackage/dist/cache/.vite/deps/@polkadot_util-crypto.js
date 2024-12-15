@@ -69,7 +69,7 @@ import {
   mnemonicValidate,
   naclDecrypt,
   naclEncrypt,
-  packageInfo2 as packageInfo,
+  packageInfo,
   pbkdf2Encode,
   randomAsHex,
   randomAsNumber,
@@ -103,7 +103,8 @@ import {
   validateAddress,
   xxhashAsHex,
   xxhashAsU8a
-} from "./chunk-XJDHVIOM.js";
+} from "./chunk-AMAN4TA5.js";
+import "./chunk-6IWCG5DM.js";
 export {
   addressEq,
   addressToEvm,

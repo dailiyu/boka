@@ -10,8 +10,11 @@ import {
   toPromiseMethod,
   toRxMethod,
   toV1
-} from "./chunk-DOPEMAGR.js";
-import "./chunk-XP6SH3PP.js";
+} from "./chunk-S34QVQUO.js";
+import "./chunk-3HXKZE63.js";
+import {
+  randomAsU8a
+} from "./chunk-AMAN4TA5.js";
 import {
   BN_HUNDRED,
   BN_ONE,
@@ -33,13 +36,12 @@ import {
   isWasm,
   logger,
   objectSpread,
-  randomAsU8a,
   stringCamelCase,
   stringify,
   u8aConcat,
   u8aToHex,
   u8aToU8a
-} from "./chunk-XJDHVIOM.js";
+} from "./chunk-6IWCG5DM.js";
 
 // ../../../../../../Users/a1-6/Desktop/d9/Boka/node_modules/@polkadot/api-contract/packageInfo.js
 var packageInfo3 = { name: "@polkadot/api-contract", path: import.meta && import.meta.url ? new URL(import.meta.url).pathname.substring(0, new URL(import.meta.url).pathname.lastIndexOf("/") + 1) : "auto", type: "esm", version: "15.0.1" };

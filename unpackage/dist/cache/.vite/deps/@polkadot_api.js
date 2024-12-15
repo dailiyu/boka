@@ -8,11 +8,12 @@ import {
   packageInfo2 as packageInfo,
   toPromiseMethod,
   toRxMethod
-} from "./chunk-DOPEMAGR.js";
+} from "./chunk-S34QVQUO.js";
 import {
   Keyring
-} from "./chunk-XP6SH3PP.js";
-import "./chunk-XJDHVIOM.js";
+} from "./chunk-3HXKZE63.js";
+import "./chunk-AMAN4TA5.js";
+import "./chunk-6IWCG5DM.js";
 export {
   ApiPromise,
   ApiRx,

@@ -1,17 +1,12 @@
 import {
-  __publicField,
   base64Decode,
   blake2AsU8a,
   decodeAddress,
-  detectPackage,
   ed25519PairFromSeed,
   ed25519Sign,
   encodeAddress,
   ethereumEncode,
   hdEthereum,
-  hexToU8a,
-  isHex,
-  isU8a,
   jsonDecryptData,
   jsonEncryptFormat,
   keccakAsU8a,
@@ -21,9 +16,7 @@ import {
   mnemonicToLegacySeed,
   mnemonicToMiniSecret,
   naclEncrypt,
-  objectSpread,
-  packageInfo,
-  packageInfo2,
+  packageInfo as packageInfo2,
   scryptEncode,
   scryptToU8a,
   secp256k1Compress,
@@ -34,14 +27,23 @@ import {
   sr25519PairFromSeed,
   sr25519Sign,
   sr25519VrfSign,
-  sr25519VrfVerify,
+  sr25519VrfVerify
+} from "./chunk-AMAN4TA5.js";
+import {
+  __publicField,
+  detectPackage,
+  hexToU8a,
+  isHex,
+  isU8a,
+  objectSpread,
+  packageInfo,
   stringToU8a,
   u8aConcat,
   u8aEmpty,
   u8aEq,
   u8aToHex,
   u8aToU8a
-} from "./chunk-XJDHVIOM.js";
+} from "./chunk-6IWCG5DM.js";
 
 // ../../../../../../Users/a1-6/Desktop/d9/Boka/node_modules/@polkadot/keyring/packageInfo.js
 var packageInfo3 = { name: "@polkadot/keyring", path: import.meta && import.meta.url ? new URL(import.meta.url).pathname.substring(0, new URL(import.meta.url).pathname.lastIndexOf("/") + 1) : "auto", type: "esm", version: "13.2.3" };
@@ -672,4 +674,4 @@ export {
   createTestPairs,
   keyring_default
 };
-//# sourceMappingURL=chunk-XP6SH3PP.js.map
+//# sourceMappingURL=chunk-3HXKZE63.js.map
