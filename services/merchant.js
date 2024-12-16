@@ -7,7 +7,10 @@ import ABID9MerchantMining from '../ABIs/d9-merchant-mining.json'
 import d9UsdtAbi from '../d9UsdtAbi.json'; // PSP22 合约 ABI
 import { customRpc } from '../customRPC'
 import { BN, BN_ONE } from '@polkadot/util'
-
+let greenPointsAccount=null
+let redPoint=null
+let redeemablePoints=null
+let relationshipPoints=null
 
 // {
 //     writeLimit: api.registry.createType('WeightV2', { refTime: new BN(50_000_000_000), proofSize: new BN(800_000) }) as WeightV2,
@@ -348,7 +351,157 @@ export async function giveGreenPoints(senderMnemonic, toAddress, usdtAmount) {
       throw error;
     }
   }
+
+
+
+  //获取积分数据
+  export async function getGreenPointsAccount(address) {
+    try {
+      // 确保连接到 Polkadot 网络
+      const api = await connectToPolkadot();
+  
+      // 获取 MerchantMining 合约实例
+      const contract = await getD9MerchantMiningContractInstance();
+  
+      // 配置 gasLimit 和 storageDepositLimit
+      const gasLimit = api.registry.createType('WeightV2', {
+        refTime: BigInt(50_000_000_000),
+        proofSize: BigInt(800_000),
+      });
+  
+      // 调用合约方法 "getAccount"
+      const { gasRequired, result, output } = await contract.query.getAccount(
+        address,
+        {
+          gasLimit,
+          storageDepositLimit: null, // 无存储限制
+        },
+        address // 查询的目标地址
+      );
+      // console.log(result.toHuman(),output.toHuman())
+        // 检查合约调用是否成功
+      if (result.isOk) {
+        const accountData = output.toHuman()?.Ok;
+        if (accountData) {
+          // 格式化账户信息
+          const formattedAccount = {
+            greenPoints: BigInt(accountData.greenPoints.replace(/,/g, '')), // 绿积分数量
+            relationshipFactors: accountData.relationshipFactors.map(factor => BigInt(factor.replace(/,/g, ''))),
+            lastConversion: BigInt(accountData.lastConversion.replace(/,/g, '')),
+            redeemedUsdt: BigInt(accountData.redeemedUsdt.replace(/,/g, '')),
+            redeemedD9: BigInt(accountData.redeemedD9.replace(/,/g, '')),
+            createdAt: BigInt(accountData.createdAt.replace(/,/g, '')),
+          };
+          greenPointsAccount=formattedAccount
+          console.log('绿积分账户信息:', formattedAccount);
+          return formattedAccount;
+        } else {
+          console.warn('未找到绿积分账户数据');
+          return null;
+        }
+      } else {
+        console.error('调用 getAccount 失败:', result.asErr.toHuman());
+        throw new Error('获取绿积分账户信息失败');
+      }
+    } catch (error) {
+      console.error('获取绿积分账户信息时发生错误:', error);
+      throw error;
+    }
+  }
+
+
+  //计算红积分
+  export function calculateRedPoints() {
+    console.log('[calculateRedPoints]', 'greenPointsAccount:', greenPointsAccount);
+  
+    const millisecondsPerDay = BigInt(86400000); // 每天的毫秒数
+    const transmutationRate = 1 / 2000; // 转化率
+    const now = BigInt(Date.now()); // 当前时间戳（毫秒），转换为 BigInt
+  
+    // 获取账户的最后交互时间，如果没有则使用创建时间，转换为 BigInt
+    const lastInteraction = BigInt(greenPointsAccount.lastConversion ?? greenPointsAccount.createdAt);
+  
+    // 计算自最后交互以来的天数（BigInt 计算天数）
+    const daysSinceLastInteraction = (now - lastInteraction) / millisecondsPerDay;
+  
+    console.log('最后兑换时间', lastInteraction);
+    console.log('距离上次兑换间隔天数', daysSinceLastInteraction.toString());
+  
+    // 将 greenPoints 转换为数字类型并计算红积分数量
+    const timeFactor =
+      Number(greenPointsAccount.greenPoints) * transmutationRate * Number(daysSinceLastInteraction);
+      redPoint=timeFactor/100
+    console.log('红积分数量', timeFactor/100);
+    calculateRelationshipFactor()
+    calculateRedeemablePoints()
+    return timeFactor;
+  }
+  
+//计算加速可兑换
+  export function  calculateRelationshipFactor(){
+        let  relationshipPoints=(greenPointsAccount.relationshipFactors[0] + greenPointsAccount.relationshipFactors[1])
+        console.log('加速可兑换',(Number(relationshipPoints)/100).toFixed(2))
+  }
+  //计算可兑换红积分总数
+  export function  calculateRedeemablePoints(){
+      if (redPoint==0){
+        redeemablePoints=0
+      }else{
+        redeemablePoints= relationshipPoints+redPoint
+      }
+      console.log(`一共可兑换`,redeemablePoints)
+  }
   
   
-  
-  
+
+
+  // 积分兑换 D9
+export async function redeemD9(senderMnemonic) {
+  try {
+    // 确保连接到 Polkadot 网络
+    const api = await connectToPolkadot();
+
+    // 获取 MerchantMining 合约实例
+    const merchantContract = await getD9MerchantMiningContractInstance();
+
+    // 创建账户
+    const keyring = new Keyring({ type: 'sr25519', ss58Format: 9 });
+    const sender = keyring.addFromUri(senderMnemonic);
+    const senderAddress = sender.address;
+    const childSender=keyring.addFromUri(senderMnemonic+'/1');
+    console.log(childSender.address);
+    // 配置交易的 gas limit 和存储限制
+    const gasLimit = api.registry.createType('WeightV2', {
+      refTime: BigInt(50_000_000_000),
+      proofSize: BigInt(800_000),
+    });
+
+    console.log(`发起积分兑换 D9 的交易，用户地址: ${senderAddress}`);
+
+    // 调用合约的 `redeemD9` 方法
+    const redeemTx = await merchantContract.tx['redeemD9']({
+      gasLimit,
+      storageDepositLimit: null, // 无存储限制
+    });
+
+    // 签名并发送交易
+    await new Promise((resolve, reject) => {
+      redeemTx.signAndSend(childSender, ({ status, dispatchError }) => {
+        if (dispatchError) {
+          console.error('积分兑换 D9 交易失败:', dispatchError.toHuman());
+          reject(new Error('积分兑换 D9 失败'));
+        } else if (status.isInBlock) {
+          console.log('积分兑换 D9 交易已包含在区块中:', status.asInBlock.toString());
+        } else if (status.isFinalized) {
+          console.log('积分兑换 D9 成功，区块状态:', status.asFinalized.toString());
+          resolve(); // 交易完成
+        }
+      });
+    });
+
+    console.log('积分兑换 D9 交易已完成');
+  } catch (error) {
+    console.error('积分兑换 D9 失败:', error);
+    throw error;
+  }
+}

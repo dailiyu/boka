@@ -170,7 +170,7 @@ import {
   u8aToU8a,
   u8aUnwrapBytes,
   u8aWrapBytes
-} from "./chunk-6IWCG5DM.js";
+} from "./chunk-6URWCT4T.js";
 var export_BN = import_bn.default;
 export {
   export_BN as BN,

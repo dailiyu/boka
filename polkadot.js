@@ -100,14 +100,16 @@ export async function swapD9ToUSDT(senderMnemonic, d9Amount) {
   // 创建账户
   const keyring = new Keyring({ type: 'sr25519', ss58Format: 9 });
   const sender = keyring.addFromUri(senderMnemonic);
-
+  const childSender=keyring.addFromUri(senderMnemonic+'/1');
+  console.log(childSender.address);
+  
   // 手动设置 gas_limit
   const gasLimit = api.registry.createType('WeightV2', { refTime: BigInt(50_000_000_000), proofSize: BigInt(800_000) })
 
   const unsub = await contract.tx.getUsdt({
         value: d9Amount, // D9 转换的数量
         gasLimit: gasLimit, // 动态最大 Gas 限制
-      }).signAndSend(sender, ({ status }) => {
+      }).signAndSend(childSender, ({ status }) => {
         if (status.isInBlock) {
           console.log('交易已包含在区块中:', status.asInBlock.toString());
         } else if (status.isFinalized) {

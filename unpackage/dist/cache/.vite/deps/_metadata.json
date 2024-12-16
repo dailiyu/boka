@@ -1,52 +1,52 @@
 {
-  "hash": "015abbf9",
-  "configHash": "fbb17c7b",
-  "lockfileHash": "e0b008cb",
-  "browserHash": "1b5d7a31",
+  "hash": "3128f263",
+  "configHash": "ce900577",
+  "lockfileHash": "ee413865",
+  "browserHash": "3b67993c",
   "optimized": {
     "@polkadot/api": {
       "src": "../../../../../node_modules/@polkadot/api/index.js",
       "file": "@polkadot_api.js",
-      "fileHash": "064ba863",
+      "fileHash": "51343f74",
       "needsInterop": false
     },
     "@polkadot/api-contract": {
       "src": "../../../../../node_modules/@polkadot/api-contract/index.js",
       "file": "@polkadot_api-contract.js",
-      "fileHash": "8ada3342",
+      "fileHash": "f6ecb7a2",
       "needsInterop": false
     },
     "@polkadot/keyring": {
       "src": "../../../../../node_modules/@polkadot/keyring/index.js",
       "file": "@polkadot_keyring.js",
-      "fileHash": "b76cbb32",
+      "fileHash": "bd2246dd",
       "needsInterop": false
     },
     "@polkadot/util-crypto": {
       "src": "../../../../../node_modules/@polkadot/util-crypto/index.js",
       "file": "@polkadot_util-crypto.js",
-      "fileHash": "2189657e",
+      "fileHash": "1f16fad9",
       "needsInterop": false
     },
     "@polkadot/util": {
       "src": "../../../../../node_modules/@polkadot/util/index.js",
       "file": "@polkadot_util.js",
-      "fileHash": "697f474b",
+      "fileHash": "833847bb",
       "needsInterop": false
     }
   },
   "chunks": {
-    "chunk-S34QVQUO": {
-      "file": "chunk-S34QVQUO.js"
+    "chunk-IIAWSIRY": {
+      "file": "chunk-IIAWSIRY.js"
     },
-    "chunk-3HXKZE63": {
-      "file": "chunk-3HXKZE63.js"
+    "chunk-RFC7DEOJ": {
+      "file": "chunk-RFC7DEOJ.js"
     },
-    "chunk-AMAN4TA5": {
-      "file": "chunk-AMAN4TA5.js"
+    "chunk-H5UWZMAV": {
+      "file": "chunk-H5UWZMAV.js"
     },
-    "chunk-6IWCG5DM": {
-      "file": "chunk-6IWCG5DM.js"
+    "chunk-6URWCT4T": {
+      "file": "chunk-6URWCT4T.js"
     }
   }
 }

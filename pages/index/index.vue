@@ -12,13 +12,19 @@
 		<button @click="handleGetMerchantExpiry">获取商家码截止时间</button>
 		<button @click="handleSubscribeMerchant">订阅商家码</button>
 		<button @click="handleGiveGreenPoints">赠送绿积分</button>
+		<button @click="handleGetGreenPointsNumber">获取积分积分数据(绿积分，最后兑换时间)</button>
+		<button @click="handleCalRedPoints">获得积分数据后计算红积分数量</button>
+		<button @click="handleRedmeD9">积分兑换D9</button>
+		<button @click="handleGetTotalMiningPoolBalance">获取矿池总数量</button>
+		<button @click="handleGetGlobalBurned">获取全球已销毁数量</button>
 	</view>
 </template>
 
 <script>
 	import { transfer,swapD9ToUSDT,getBalance,swapUSDTToD9 ,transferUSDT} from '@/polkadot.js';
 	import {getContractsModuleMetadata,getTotalIssuance,getBlockHeight,getD9AndUSDTReserves} from "../../services/metadata"
-	import {getMerchantExpiry,subscribeMerchant,giveGreenPoints} from "../../services/merchant" 
+	import {getMerchantExpiry,subscribeMerchant,giveGreenPoints,getGreenPointsAccount,calculateRedPoints,redeemD9} from "../../services/merchant" 
+	import {getTotalMiningPoolBalance,getGlobalBurned} from '../../services/burn_ming.js'
 	export default {
 		data() {
 			return {
@@ -41,10 +47,9 @@
 				getBlockHeight()
 			},
 			async handleSwap() {
-			  const senderMnemonic = this.Mnemonic;// 替换为发送方助记词
-			  const d9Amount = 15000000000000n; // D9 数量，单位为最小单位（如 wei）
+			  const d9Amount = 1000000000000n; // D9 数量，单位为最小单位（如 wei）
 			  try {
-			    await swapD9ToUSDT(senderMnemonic, d9Amount);
+			    await swapD9ToUSDT(this.Mnemonic2, d9Amount);
 			    uni.showToast({
 			      title: 'Swap successful!',
 			      icon: 'success'
@@ -124,6 +129,27 @@
 			},
 			async handleGiveGreenPoints(){
 			 await	giveGreenPoints(this.Mnemonic2,this.Address3,1)
+			},
+			async handleGetGreenPointsNumber(){
+				getGreenPointsAccount('uCJQa68qZoLB9FBFPmFBLN8naukx1B8nhpSMdquzVwxMAzH')
+			},
+			async handleCalRedPoints(){
+				calculateRedPoints()
+			},
+			async handleRedmeD9(){
+				redeemD9(this.Mnemonic2)
+			},
+			async handleGetTotalMiningPoolBalance(){
+				try {
+					console.log('开始计算总矿池余额...');
+					const totalBalance = await getTotalMiningPoolBalance();
+					console.log(`最终总矿池余额为: ${totalBalance}`);
+				} catch (error) {
+					console.error('计算总矿池余额失败:', error);
+				}
+			},
+			async handleGetGlobalBurned(){
+				getGlobalBurned()
 			}
 		}
 	}
