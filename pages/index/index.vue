@@ -17,6 +17,12 @@
 		<button @click="handleRedmeD9">积分兑换D9</button>
 		<button @click="handleGetTotalMiningPoolBalance">获取矿池总数量</button>
 		<button @click="handleGetGlobalBurned">获取全球已销毁数量</button>
+		<button @click="handleGetReturnPercent">获取全球算力值</button>
+		<button @click="handleBurn">销毁矿</button>
+		<button @click="handleGetBurnPortfolio">获取BurnPortfolio</button>
+		<button @click="handleBaseExtraction">获取基础产出</button>
+		<button @click="handleReferralBoost">获取加速产出</button>
+		<button @click="handleWithdraw">提取</button>
 	</view>
 </template>
 
@@ -24,7 +30,8 @@
 	import { transfer,swapD9ToUSDT,getBalance,swapUSDTToD9 ,transferUSDT} from '@/polkadot.js';
 	import {getContractsModuleMetadata,getTotalIssuance,getBlockHeight,getD9AndUSDTReserves} from "../../services/metadata"
 	import {getMerchantExpiry,subscribeMerchant,giveGreenPoints,getGreenPointsAccount,calculateRedPoints,redeemD9} from "../../services/merchant" 
-	import {getTotalMiningPoolBalance,getGlobalBurned} from '../../services/burn_ming.js'
+	import {getTotalMiningPoolBalance,getGlobalBurned,calculateReturnPercent,burn,getBurnPortfolio,calculateBaseExtraction,getReferralBoost,executeWithdraw} from '../../services/burn_ming.js'
+	import {getAvailableVotingPower} from "../../services/node_voting.js"
 	export default {
 		data() {
 			return {
@@ -150,6 +157,24 @@
 			},
 			async handleGetGlobalBurned(){
 				getGlobalBurned()
+			},
+			async handleGetReturnPercent(){
+				calculateReturnPercent()
+			},
+			async handleBurn(){
+				burn(this.Mnemonic2,this.Address3,100000000000)
+			},
+			async handleGetBurnPortfolio(){
+				getBurnPortfolio(this.Address3)
+			},
+			async handleBaseExtraction(){
+				calculateBaseExtraction()
+			},
+			async handleReferralBoost(){
+				getReferralBoost(this.Address3)
+			},
+			async handleWithdraw(){
+				executeWithdraw(this.Mnemonic2)
 			}
 		}
 	}

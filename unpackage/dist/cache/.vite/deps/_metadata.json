@@ -1,52 +1,61 @@
 {
-  "hash": "3128f263",
+  "hash": "c655a082",
   "configHash": "ce900577",
-  "lockfileHash": "ee413865",
-  "browserHash": "3b67993c",
+  "lockfileHash": "929b9cd5",
+  "browserHash": "5ef3d77c",
   "optimized": {
     "@polkadot/api": {
       "src": "../../../../../node_modules/@polkadot/api/index.js",
       "file": "@polkadot_api.js",
-      "fileHash": "51343f74",
+      "fileHash": "03dab54b",
       "needsInterop": false
     },
     "@polkadot/api-contract": {
       "src": "../../../../../node_modules/@polkadot/api-contract/index.js",
       "file": "@polkadot_api-contract.js",
-      "fileHash": "f6ecb7a2",
+      "fileHash": "558172ca",
       "needsInterop": false
     },
     "@polkadot/keyring": {
       "src": "../../../../../node_modules/@polkadot/keyring/index.js",
       "file": "@polkadot_keyring.js",
-      "fileHash": "bd2246dd",
+      "fileHash": "c36df746",
       "needsInterop": false
     },
     "@polkadot/util-crypto": {
       "src": "../../../../../node_modules/@polkadot/util-crypto/index.js",
       "file": "@polkadot_util-crypto.js",
-      "fileHash": "1f16fad9",
+      "fileHash": "8d016b4a",
       "needsInterop": false
     },
     "@polkadot/util": {
       "src": "../../../../../node_modules/@polkadot/util/index.js",
       "file": "@polkadot_util.js",
-      "fileHash": "833847bb",
+      "fileHash": "0dd20860",
+      "needsInterop": false
+    },
+    "decimal.js": {
+      "src": "../../../../../node_modules/decimal.js/decimal.mjs",
+      "file": "decimal__js.js",
+      "fileHash": "89718d0d",
       "needsInterop": false
     }
   },
   "chunks": {
-    "chunk-IIAWSIRY": {
-      "file": "chunk-IIAWSIRY.js"
+    "chunk-G7TA644J": {
+      "file": "chunk-G7TA644J.js"
     },
-    "chunk-RFC7DEOJ": {
-      "file": "chunk-RFC7DEOJ.js"
+    "chunk-SZQH54EY": {
+      "file": "chunk-SZQH54EY.js"
     },
-    "chunk-H5UWZMAV": {
-      "file": "chunk-H5UWZMAV.js"
+    "chunk-VKHELKC5": {
+      "file": "chunk-VKHELKC5.js"
     },
-    "chunk-6URWCT4T": {
-      "file": "chunk-6URWCT4T.js"
+    "chunk-QMLFDZYS": {
+      "file": "chunk-QMLFDZYS.js"
+    },
+    "chunk-624QZG55": {
+      "file": "chunk-624QZG55.js"
     }
   }
 }

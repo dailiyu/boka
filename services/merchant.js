@@ -475,9 +475,7 @@ export async function redeemD9(senderMnemonic) {
       refTime: BigInt(50_000_000_000),
       proofSize: BigInt(800_000),
     });
-
     console.log(`发起积分兑换 D9 的交易，用户地址: ${senderAddress}`);
-
     // 调用合约的 `redeemD9` 方法
     const redeemTx = await merchantContract.tx['redeemD9']({
       gasLimit,
@@ -486,9 +484,9 @@ export async function redeemD9(senderMnemonic) {
 
     // 签名并发送交易
     await new Promise((resolve, reject) => {
-      redeemTx.signAndSend(childSender, ({ status, dispatchError }) => {
+      redeemTx.signAndSend(sender, ({ status, dispatchError }) => {
         if (dispatchError) {
-          console.error('积分兑换 D9 交易失败:', dispatchError.toHuman());
+          console.error('积分兑换 D9 交易失败:', dispatchError.toJSON());
           reject(new Error('积分兑换 D9 失败'));
         } else if (status.isInBlock) {
           console.log('积分兑换 D9 交易已包含在区块中:', status.asInBlock.toString());

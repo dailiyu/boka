@@ -10,16 +10,15 @@ import {
   toPromiseMethod,
   toRxMethod,
   toV1
-} from "./chunk-IIAWSIRY.js";
-import "./chunk-RFC7DEOJ.js";
+} from "./chunk-G7TA644J.js";
+import "./chunk-SZQH54EY.js";
 import {
   randomAsU8a
-} from "./chunk-H5UWZMAV.js";
+} from "./chunk-VKHELKC5.js";
 import {
   BN_HUNDRED,
   BN_ONE,
   BN_ZERO,
-  __publicField,
   assertReturn,
   bnToBn,
   compactAddLength,
@@ -41,13 +40,16 @@ import {
   u8aConcat,
   u8aToHex,
   u8aToU8a
-} from "./chunk-6URWCT4T.js";
+} from "./chunk-QMLFDZYS.js";
+import {
+  __publicField
+} from "./chunk-624QZG55.js";
 
 // ../../../../../../Users/daily/Desktop/d9/boka/node_modules/@polkadot/api-contract/packageInfo.js
 var packageInfo3 = { name: "@polkadot/api-contract", path: import.meta && import.meta.url ? new URL(import.meta.url).pathname.substring(0, new URL(import.meta.url).pathname.lastIndexOf("/") + 1) : "auto", type: "esm", version: "15.0.1" };
 
 // ../../../../../../Users/daily/Desktop/d9/boka/node_modules/@polkadot/api-contract/packageDetect.js
-detectPackage(packageInfo3, null, [packageInfo2, packageInfo]);
+detectPackage(packageInfo3, null, [packageInfo, packageInfo2]);
 
 // ../../../../../../Users/daily/Desktop/d9/boka/node_modules/@polkadot/api-contract/Abi/toV1.js
 function v0ToV1Names(all) {

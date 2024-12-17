@@ -5,15 +5,16 @@ import {
   ScProvider,
   SubmittableResult,
   WsProvider,
-  packageInfo2 as packageInfo,
+  packageInfo,
   toPromiseMethod,
   toRxMethod
-} from "./chunk-IIAWSIRY.js";
+} from "./chunk-G7TA644J.js";
 import {
   Keyring
-} from "./chunk-RFC7DEOJ.js";
-import "./chunk-H5UWZMAV.js";
-import "./chunk-6URWCT4T.js";
+} from "./chunk-SZQH54EY.js";
+import "./chunk-VKHELKC5.js";
+import "./chunk-QMLFDZYS.js";
+import "./chunk-624QZG55.js";
 export {
   ApiPromise,
   ApiRx,

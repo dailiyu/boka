@@ -28,9 +28,8 @@ import {
   sr25519Sign,
   sr25519VrfSign,
   sr25519VrfVerify
-} from "./chunk-H5UWZMAV.js";
+} from "./chunk-VKHELKC5.js";
 import {
-  __publicField,
   detectPackage,
   hexToU8a,
   isHex,
@@ -43,7 +42,10 @@ import {
   u8aEq,
   u8aToHex,
   u8aToU8a
-} from "./chunk-6URWCT4T.js";
+} from "./chunk-QMLFDZYS.js";
+import {
+  __publicField
+} from "./chunk-624QZG55.js";
 
 // ../../../../../../Users/daily/Desktop/d9/boka/node_modules/@polkadot/keyring/packageInfo.js
 var packageInfo3 = { name: "@polkadot/keyring", path: import.meta && import.meta.url ? new URL(import.meta.url).pathname.substring(0, new URL(import.meta.url).pathname.lastIndexOf("/") + 1) : "auto", type: "esm", version: "13.2.3" };
@@ -674,4 +676,4 @@ export {
   createTestPairs,
   keyring_default
 };
-//# sourceMappingURL=chunk-RFC7DEOJ.js.map
+//# sourceMappingURL=chunk-SZQH54EY.js.map
