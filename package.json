@@ -1,9 +1,13 @@
 {
   "dependencies": {
+    "@apollo/client": "^3.12.3",
     "@polkadot/api": "^15.0.1",
     "@polkadot/api-contract": "^15.0.1",
     "@polkadot/keyring": "^13.2.3",
     "@polkadot/util-crypto": "^13.2.3",
-    "decimal.js": "^10.4.3"
+    "decimal.js": "^10.4.3",
+    "graphql-ws": "^5.16.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
   }
 }

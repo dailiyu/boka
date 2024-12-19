@@ -20,7 +20,7 @@ export async function connectToPolkadot() {
         await apiInstance.rpc.system.chain();
         console.log('已复用现有连接。');
         return apiInstance;
-      } catch {
+      } catch {               
         console.warn('连接无效，重新连接...');
         apiInstance = null;
       }
@@ -341,3 +341,430 @@ export async function swapUSDTToD9(senderMnemonic, usdtAmount) {
 
 
 
+// 增加流动性函数
+export async function addLiquidity(senderMnemonic, d9Amount) {
+  try {
+    await cryptoWaitReady();
+    const api = await connectToPolkadot();
+
+    const keyring = new Keyring({ type: 'sr25519', ss58Format: 9 });
+    const sender = keyring.addFromUri(senderMnemonic);
+    const marketMakerContract = await getMarketMakerContractInstance();
+
+    const senderAddress = sender.address;
+    const usdtAmount = await calculateUsdtFromD9(d9Amount, getD9ToUsdtRate);
+
+    const d9AmountInSmallestUnit = BigInt(Math.round(d9Amount * 1_000_000_000_000));
+    const usdtAmountInSmallestUnit = BigInt(Math.round(usdtAmount * 100));
+
+    console.log('最小单位:', { d9AmountInSmallestUnit, usdtAmountInSmallestUnit });
+
+    // 获取最新的账户 Nonce
+    const nonce = await api.rpc.system.accountNextIndex(sender.address);
+
+    // 设置交易优先级
+    const gasLimit = api.registry.createType('WeightV2', { refTime: BigInt(50_000_000_000), proofSize: BigInt(800_000) });
+    const addLiquidityTx = marketMakerContract.tx['addLiquidity'](
+      { gasLimit, storageDepositLimit: null, value: d9AmountInSmallestUnit.toString() },
+      usdtAmountInSmallestUnit.toString()
+    );
+
+    return new Promise((resolve, reject) => {
+      addLiquidityTx.signAndSend(sender, { nonce, tip: 1_000_000_000 }, ({ status, dispatchError }) => {
+        if (status.isInBlock) {
+          console.log('交易已包含在区块中:', status.asInBlock.toString());
+        } else if (status.isFinalized) {
+          console.log('交易已最终确认:', status.asFinalized.toString());
+          resolve('流动性增加成功');
+        }
+
+        if (dispatchError) {
+          if (dispatchError.isModule) {
+            const decoded = api.registry.findMetaError(dispatchError.asModule);
+            const { section, name, docs } = decoded;
+            console.error(`交易失败: ${section}.${name}: ${docs.join(' ')}`);
+          } else {
+            console.error('交易失败:', dispatchError.toString());
+          }
+          reject('流动性增加失败');
+        }
+      });
+    });
+  } catch (error) {
+    console.error('增加流动性失败:', error);
+    throw error;
+  }
+}
+
+
+//检查换算的usdt和d9误差是否在允许范围内
+async function checkLiquidity(d9, usdt, getReserves) {
+  try {
+    console.log('checking liquidity', 'd9', d9, 'usdt', usdt);
+
+    const threshold = 0.1; // 允许的价格差阈值
+
+    // 获取储备量
+    const reserves = await getReserves(); // 假设 getReserves 是一个返回储备量的函数
+    const d9Reserve = reserves.d9;
+    const usdtReserve = reserves.usdt;
+
+    if (d9Reserve === 0 || usdtReserve === 0) {
+      console.log('储备量为 0，流动性检查通过');
+      return true;
+    }
+
+    // 当前价格和新增流动性价格
+    const price = d9Reserve / usdtReserve;
+    const newLiquidityPrice = d9 / usdt;
+
+    // 计算价格差异
+    const difference = Math.abs(price - newLiquidityPrice);
+    console.log('checking liquidity', `difference is`, difference);
+
+    // 返回检查结果
+    return difference < threshold;
+  } catch (error) {
+    console.error('检查流动性失败:', error);
+    throw error;
+  }
+}
+
+
+
+//从D9换算到Usdt
+async function calculateUsdtFromD9(d9Value, d9ToUsdtRateFn) {
+  const value = Number(d9Value);
+  if (!value || Number.isNaN(value)) {
+    console.warn('无效的 D9 输入值:', d9Value);
+    return null;
+  }
+
+  try {
+    // 获取实时 D9 -> USDT 的兑换比例
+    const d9ToUsdtRate = await d9ToUsdtRateFn();
+    const usdtValue = Math.round(value * d9ToUsdtRate * 10 ** 2) / 10 ** 2;
+    console.log(`D9 转 USDT: 输入值 = ${value}, 兑换比例 = ${d9ToUsdtRate}, USDT 数量 = ${usdtValue}`);
+    return usdtValue;
+  } catch (error) {
+    console.error('D9 转 USDT 计算失败:', error);
+    throw error;
+  }
+}
+
+
+//从Usdt换算到D9
+async function calculateD9FromUsdt(usdtValue, usdtToD9RateFn) {
+  const value = Number(usdtValue);
+  if (!value || Number.isNaN(value)) {
+    console.warn('无效的 USDT 输入值:', usdtValue);
+    return null;
+  }
+
+  try {
+    // 获取实时 USDT -> D9 的兑换比例
+    const usdtToD9Rate = await usdtToD9RateFn();
+    const d9Value = Math.round(value * usdtToD9Rate * 10 ** 2) / 10 ** 2;
+    console.log(`USDT 转 D9: 输入值 = ${value}, 兑换比例 = ${usdtToD9Rate}, D9 数量 = ${d9Value}`);
+    return d9Value;
+  } catch (error) {
+    console.error('USDT 转 D9 计算失败:', error);
+    throw error;
+  }
+}
+
+
+// 获取 USDT 到 D9 的兑换比例（考虑最小单位）
+export async function getUsdtToD9Rate() {
+  try {
+    // 1. 连接到 Polkadot 网络
+    const api = await connectToPolkadot();
+
+    // 2. 获取 Market-Maker 合约实例（假设储备量查询在 Market-Maker 合约中）
+    const marketMakerContract = await getMarketMakerContractInstance();
+
+    // 3. 设置 Gas 限制
+    const gasLimit = api.registry.createType('WeightV2', {
+      refTime: BigInt(50_000_000_000),
+      proofSize: BigInt(800_000),
+    });
+
+    // 4. 查询储备量
+    console.log('正在查询 USDT 到 D9 的兑换比例...');
+    const { output, result } = await marketMakerContract.query['getCurrencyReserves'](
+      null, // 调用方地址（可以为 null，视合约要求）
+      { gasLimit, storageDepositLimit: null } // Gas 和存储限制
+    );
+
+    // 5. 检查结果
+    if (result.isErr) {
+      console.error('查询储备量失败:', result.asErr.toHuman());
+      throw new Error('储备量查询失败');
+    }
+
+    if (output && output.isOk) {
+      // 解析储备量结果（根据链上合约返回的格式）
+      const reserves = output.toHuman();
+      let d9Reserve = parseFloat(reserves.Ok[0].replace(/,/g, '')); // D9 储备量
+      let usdtReserve = parseFloat(reserves.Ok[1].replace(/,/g, '')); // USDT 储备量
+
+      // 考虑最小单位
+      const D9_UNIT = 1_000_000_000_000; // D9 的最小单位
+      const USDT_UNIT = 100; // USDT 的最小单位
+
+      d9Reserve /= D9_UNIT;
+      usdtReserve /= USDT_UNIT;
+
+      if (usdtReserve === 0) {
+        throw new Error('USDT 储备量为 0，无法计算兑换比例');
+      }
+
+      // 计算 USDT -> D9 的兑换比例
+      const usdtToD9Rate = d9Reserve / usdtReserve;
+      console.log(`USDT 到 D9 的兑换比例: ${usdtToD9Rate}`);
+
+      return usdtToD9Rate; // 返回兑换比例
+    } else {
+      console.error('储备量查询返回错误:', output?.asErr?.toString());
+      return null;
+    }
+  } catch (error) {
+    console.error('获取 USDT 到 D9 的兑换比例失败:', error);
+    throw error;
+  }
+}
+
+
+// 获取 D9 到 USDT 的兑换比例（考虑最小单位）
+export async function getD9ToUsdtRate() {
+  try {
+    // 1. 连接到 Polkadot 网络
+    const api = await connectToPolkadot();
+
+    // 2. 获取 Market-Maker 合约实例
+    const marketMakerContract = await getMarketMakerContractInstance();
+
+    // 3. 设置 Gas 限制
+    const gasLimit = api.registry.createType('WeightV2', {
+      refTime: BigInt(50_000_000_000),
+      proofSize: BigInt(800_000),
+    });
+
+    // 4. 查询储备量
+    console.log('正在查询 D9 到 USDT 的兑换比例...');
+    const { output, result } = await marketMakerContract.query['getCurrencyReserves'](
+      null, // 调用方地址（可以为 null，视合约要求）
+      { gasLimit, storageDepositLimit: null } // Gas 和存储限制
+    );
+
+    // 5. 检查结果
+    if (result.isErr) {
+      console.error('查询储备量失败:', result.asErr.toHuman());
+      throw new Error('储备量查询失败');
+    }
+
+    if (output && output.isOk) {
+      // 解析储备量结果（根据链上合约返回的格式）
+      const reserves = output.toHuman();
+      let d9Reserve = parseFloat(reserves.Ok[0].replace(/,/g, '')); // D9 储备量
+      let usdtReserve = parseFloat(reserves.Ok[1].replace(/,/g, '')); // USDT 储备量
+
+      // 考虑最小单位
+      const D9_UNIT = 1_000_000_000_000; // D9 的最小单位
+      const USDT_UNIT = 100; // USDT 的最小单位
+
+      d9Reserve /= D9_UNIT;
+      usdtReserve /= USDT_UNIT;
+
+      if (d9Reserve === 0) {
+        throw new Error('D9 储备量为 0，无法计算兑换比例');
+      }
+
+      // 计算 D9 -> USDT 的兑换比例
+      const d9ToUsdtRate = usdtReserve / d9Reserve;
+      console.log(`D9 到 USDT 的兑换比例: ${d9ToUsdtRate}`);
+
+      return d9ToUsdtRate; // 返回兑换比例
+    } else {
+      console.error('储备量查询返回错误:', output?.asErr?.toString());
+      return null;
+    }
+  } catch (error) {
+    console.error('获取 D9 到 USDT 的兑换比例失败:', error);
+    throw error;
+  }
+}
+
+
+/**
+ * 检查和设置 USDT Allowance
+ * @param {string} senderMnemonic - 用户的助记词
+ * @param {string} spenderAddress - 被授权合约的地址（如 Market-Maker 合约地址）
+ * @param {number | bigint} usdtAmount - 需要的 USDT 数量（最小单位）
+ * @returns {Promise<void>} - 如果 Allowance 足够，直接返回；否则设置 Allowance 后返回。
+ */
+export async function checkAndSetUsdtAllowance(senderMnemonic, spenderAddress, usdtAmount) {
+  try {
+    // 初始化连接和账户
+    const api = await connectToPolkadot();
+    const keyring = new Keyring({ type: 'sr25519', ss58Format: 9 });
+    const sender = keyring.addFromUri(senderMnemonic);
+    const senderAddress = sender.address;
+
+    // 获取 USDT 合约实例
+    const usdtContract = await getPSP22ContractInstance();
+
+    // 设置 Gas 限制
+    const gasLimit = api.registry.createType('WeightV2', { refTime: BigInt(50_000_000_000), proofSize: BigInt(800_000) });
+
+    // 查询当前 Allowance
+    console.log('检查 USDT Allowance...');
+    const allowanceQuery = await usdtContract.query['psp22::allowance'](
+      senderAddress,
+      { gasLimit, storageDepositLimit: null },
+      senderAddress,
+      spenderAddress
+    );
+
+    if (allowanceQuery.result.isErr) {
+      console.error('Allowance 查询失败:', allowanceQuery.result.asErr.toHuman());
+      throw new Error('Allowance 查询失败');
+    }
+
+    // 解析 Allowance
+    let currentAllowance = allowanceQuery.output?.toHuman();
+    console.log('Allowance 查询返回值:', currentAllowance);
+
+    if (currentAllowance && typeof currentAllowance === 'object' && 'Ok' in currentAllowance) {
+      currentAllowance = currentAllowance.Ok; // 提取 `Ok` 字段
+    }
+
+    if (typeof currentAllowance === 'string') {
+      currentAllowance = currentAllowance.replace(/,/g, ''); // 去掉逗号
+    } else {
+      console.warn('Allowance 数据格式不符，默认设置为 0');
+      currentAllowance = '0'; // 默认值为 0
+    }
+
+    currentAllowance = BigInt(currentAllowance); // 转换为 BigInt
+    console.log(`当前 Allowance 为: ${currentAllowance}`);
+
+    // 如果 Allowance 小于需要的 USDT 数量，设置新的 Allowance
+    if (currentAllowance < BigInt(usdtAmount)) {
+      console.log(`当前 Allowance 不足 (${currentAllowance} < ${usdtAmount})，正在设置新的 Allowance...`);
+
+      const approveTx = usdtContract.tx['psp22::approve'](
+        { gasLimit, storageDepositLimit: null },
+        spenderAddress,
+        usdtAmount
+      );
+
+      await new Promise((resolve, reject) => {
+        approveTx.signAndSend(sender, ({ status, dispatchError }) => {
+          if (status.isInBlock) {
+            console.log('Allowance 交易已包含在区块中:', status.asInBlock.toString());
+          } else if (status.isFinalized) {
+            console.log('Allowance 设置成功:', status.asFinalized.toString());
+            resolve();
+          }
+
+          if (dispatchError) {
+            if (dispatchError.isModule) {
+              const decoded = api.registry.findMetaError(dispatchError.asModule);
+              const { section, name, docs } = decoded;
+              console.error(`Allowance 设置失败: ${section}.${name}: ${docs.join(' ')}`);
+            } else {
+              console.error('Allowance 设置失败:', dispatchError.toString());
+            }
+            reject(new Error('Allowance 设置失败'));
+          }
+        });
+      });
+    } else {
+      console.log('当前 Allowance 已满足，无需重新设置');
+    }
+  } catch (error) {
+    console.error('检查和设置 USDT Allowance 失败:', error);
+    throw error;
+  }
+}
+
+
+
+
+// 查询流动性提供者余额
+async function getLiquidityProviderBalance(senderAddress) {
+  const contract = await getMarketMakerContractInstance();
+  const api = await connectToPolkadot();
+
+  const { output, result } = await contract.query['getLiquidityProvider'](
+    senderAddress,
+    {
+      gasLimit: api.registry.createType('WeightV2', { refTime: BigInt(50_000_000_000), proofSize: BigInt(800_000) }),
+      storageDepositLimit: null,
+    },
+    senderAddress
+  );
+
+  if (result.isErr) {
+    throw new Error(`查询流动性提供者失败: ${result.asErr.toHuman()}`);
+  }
+
+  return output?.toHuman() || 0;
+}
+
+// 移除流动性
+export async function removeLiquidity(senderMnemonic) {
+  try {
+    // 初始化连接和账户
+    await cryptoWaitReady();
+    const api = await connectToPolkadot();
+    const keyring = new Keyring({ type: 'sr25519', ss58Format: 9 });
+    const sender = keyring.addFromUri(senderMnemonic);
+    const senderAddress = sender.address;
+
+    // 检查流动性提供者余额
+    const liquidityProviderBalance = await getLiquidityProviderBalance(senderAddress);
+    console.log(`流动性提供者余额: ${liquidityProviderBalance}`);
+
+    if (liquidityProviderBalance <= 0) {
+      console.warn('流动性提供者余额不足，无法移除流动性。');
+      return Promise.reject('流动性提供者余额不足。');
+    }
+
+    // 获取 Market-Maker 合约实例
+    const marketMakerContract = await getMarketMakerContractInstance();
+
+    // 调用 removeLiquidity 方法
+    console.log('开始移除流动性...');
+    const removeLiquidityTx = marketMakerContract.tx['removeLiquidity']({
+      gasLimit: api.registry.createType('WeightV2', { refTime: BigInt(50_000_000_000), proofSize: BigInt(800_000) }),
+      storageDepositLimit: null,
+    });
+
+    return new Promise((resolve, reject) => {
+      removeLiquidityTx.signAndSend(sender, ({ status, dispatchError }) => {
+        if (status.isInBlock) {
+          console.log('移除流动性交易已包含在区块中:', status.asInBlock.toString());
+        } else if (status.isFinalized) {
+          console.log('移除流动性交易已最终确认:', status.asFinalized.toString());
+          resolve('移除流动性成功');
+        }
+
+        if (dispatchError) {
+          if (dispatchError.isModule) {
+            const decoded = api.registry.findMetaError(dispatchError.asModule);
+            const { section, name, docs } = decoded;
+            console.error(`移除流动性失败: ${section}.${name}: ${docs.join(' ')}`);
+          } else {
+            console.error('移除流动性失败:', dispatchError.toString());
+          }
+          reject('移除流动性失败');
+        }
+      });
+    });
+  } catch (error) {
+    console.error('移除流动性失败:', error);
+    throw error;
+  }
+}

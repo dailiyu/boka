@@ -1,49 +1,67 @@
 {
-  "hash": "c655a082",
+  "hash": "570dc458",
   "configHash": "ce900577",
-  "lockfileHash": "929b9cd5",
-  "browserHash": "5ef3d77c",
+  "lockfileHash": "38511b31",
+  "browserHash": "e4acc7ce",
   "optimized": {
     "@polkadot/api": {
       "src": "../../../../../node_modules/@polkadot/api/index.js",
       "file": "@polkadot_api.js",
-      "fileHash": "03dab54b",
+      "fileHash": "55c2ab3f",
       "needsInterop": false
     },
     "@polkadot/api-contract": {
       "src": "../../../../../node_modules/@polkadot/api-contract/index.js",
       "file": "@polkadot_api-contract.js",
-      "fileHash": "558172ca",
+      "fileHash": "00be2e5f",
       "needsInterop": false
     },
     "@polkadot/keyring": {
       "src": "../../../../../node_modules/@polkadot/keyring/index.js",
       "file": "@polkadot_keyring.js",
-      "fileHash": "c36df746",
+      "fileHash": "ecd2e22d",
       "needsInterop": false
     },
     "@polkadot/util-crypto": {
       "src": "../../../../../node_modules/@polkadot/util-crypto/index.js",
       "file": "@polkadot_util-crypto.js",
-      "fileHash": "8d016b4a",
+      "fileHash": "e9ca0c8b",
       "needsInterop": false
     },
     "@polkadot/util": {
       "src": "../../../../../node_modules/@polkadot/util/index.js",
       "file": "@polkadot_util.js",
-      "fileHash": "0dd20860",
+      "fileHash": "5f746777",
+      "needsInterop": false
+    },
+    "graphql-ws": {
+      "src": "../../../../../node_modules/graphql-ws/lib/index.mjs",
+      "file": "graphql-ws.js",
+      "fileHash": "4c158f42",
       "needsInterop": false
     },
     "decimal.js": {
       "src": "../../../../../node_modules/decimal.js/decimal.mjs",
       "file": "decimal__js.js",
-      "fileHash": "89718d0d",
+      "fileHash": "7cd0da67",
+      "needsInterop": false
+    },
+    "@apollo/client": {
+      "src": "../../../../../node_modules/@apollo/client/index.js",
+      "file": "@apollo_client.js",
+      "fileHash": "9a8ad0bf",
       "needsInterop": false
     }
   },
   "chunks": {
-    "chunk-G7TA644J": {
-      "file": "chunk-G7TA644J.js"
+    "chunk-ESH2MEWL": {
+      "file": "chunk-ESH2MEWL.js"
+    },
+    "chunk-YMHB47P3": {
+      "file": "chunk-YMHB47P3.js"
+    },
+    "chunk-JRL72YIJ": {
+      "file": "chunk-JRL72YIJ.js"
     },
     "chunk-SZQH54EY": {
       "file": "chunk-SZQH54EY.js"
