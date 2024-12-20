@@ -285,10 +285,10 @@ export default {
       getTransfers(this.Address3, token);
     },
     async handleAddLiquidity(){
-      addLiquidity(this.Mnemonic2,10)
+      addLiquidity(this.Mnemonic,20,1.72)
     },
     async handleRemoveLiquidity(){
-      removeLiquidity(this.Mnemonic2)
+      removeLiquidity(this.Mnemonic)
     }
   },
 };

@@ -1,67 +1,61 @@
 {
-  "hash": "570dc458",
+  "hash": "d2cff998",
   "configHash": "ce900577",
-  "lockfileHash": "38511b31",
-  "browserHash": "e4acc7ce",
+  "lockfileHash": "93e4f308",
+  "browserHash": "faf049dd",
   "optimized": {
     "@polkadot/api": {
       "src": "../../../../../node_modules/@polkadot/api/index.js",
       "file": "@polkadot_api.js",
-      "fileHash": "55c2ab3f",
+      "fileHash": "9fd26587",
       "needsInterop": false
     },
     "@polkadot/api-contract": {
       "src": "../../../../../node_modules/@polkadot/api-contract/index.js",
       "file": "@polkadot_api-contract.js",
-      "fileHash": "00be2e5f",
+      "fileHash": "b2779b7b",
       "needsInterop": false
     },
     "@polkadot/keyring": {
       "src": "../../../../../node_modules/@polkadot/keyring/index.js",
       "file": "@polkadot_keyring.js",
-      "fileHash": "ecd2e22d",
+      "fileHash": "7d30c8a9",
       "needsInterop": false
     },
     "@polkadot/util-crypto": {
       "src": "../../../../../node_modules/@polkadot/util-crypto/index.js",
       "file": "@polkadot_util-crypto.js",
-      "fileHash": "e9ca0c8b",
+      "fileHash": "99a86580",
       "needsInterop": false
     },
     "@polkadot/util": {
       "src": "../../../../../node_modules/@polkadot/util/index.js",
       "file": "@polkadot_util.js",
-      "fileHash": "5f746777",
-      "needsInterop": false
-    },
-    "graphql-ws": {
-      "src": "../../../../../node_modules/graphql-ws/lib/index.mjs",
-      "file": "graphql-ws.js",
-      "fileHash": "4c158f42",
-      "needsInterop": false
-    },
-    "decimal.js": {
-      "src": "../../../../../node_modules/decimal.js/decimal.mjs",
-      "file": "decimal__js.js",
-      "fileHash": "7cd0da67",
+      "fileHash": "dd43704c",
       "needsInterop": false
     },
     "@apollo/client": {
       "src": "../../../../../node_modules/@apollo/client/index.js",
       "file": "@apollo_client.js",
-      "fileHash": "9a8ad0bf",
+      "fileHash": "c4b70107",
+      "needsInterop": false
+    },
+    "decimal.js": {
+      "src": "../../../../../node_modules/decimal.js/decimal.mjs",
+      "file": "decimal__js.js",
+      "fileHash": "40c2802e",
+      "needsInterop": false
+    },
+    "bignumber.js": {
+      "src": "../../../../../node_modules/bignumber.js/bignumber.mjs",
+      "file": "bignumber__js.js",
+      "fileHash": "7ae40e12",
       "needsInterop": false
     }
   },
   "chunks": {
-    "chunk-ESH2MEWL": {
-      "file": "chunk-ESH2MEWL.js"
-    },
-    "chunk-YMHB47P3": {
-      "file": "chunk-YMHB47P3.js"
-    },
-    "chunk-JRL72YIJ": {
-      "file": "chunk-JRL72YIJ.js"
+    "chunk-7YKAPMVW": {
+      "file": "chunk-7YKAPMVW.js"
     },
     "chunk-SZQH54EY": {
       "file": "chunk-SZQH54EY.js"
@@ -71,6 +65,9 @@
     },
     "chunk-QMLFDZYS": {
       "file": "chunk-QMLFDZYS.js"
+    },
+    "chunk-JRL72YIJ": {
+      "file": "chunk-JRL72YIJ.js"
     },
     "chunk-624QZG55": {
       "file": "chunk-624QZG55.js"

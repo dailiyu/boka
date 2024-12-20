@@ -10,8 +10,7 @@ import {
   toPromiseMethod,
   toRxMethod,
   toV1
-} from "./chunk-YMHB47P3.js";
-import "./chunk-JRL72YIJ.js";
+} from "./chunk-7YKAPMVW.js";
 import "./chunk-SZQH54EY.js";
 import {
   randomAsU8a
@@ -42,6 +41,7 @@ import {
   u8aToHex,
   u8aToU8a
 } from "./chunk-QMLFDZYS.js";
+import "./chunk-JRL72YIJ.js";
 import {
   __publicField
 } from "./chunk-624QZG55.js";
